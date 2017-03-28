@@ -204,7 +204,8 @@ void myDisplay(void) {
 	viewMatrix = camera.getMatrix();
 	persectiveMatrix.setupPerspective(50, windowWidth / windowHeight, .1f, 100.0f);
 	 
-	cube.drawAsLine(worldMatrix*viewMatrix*persectiveMatrix, fbo);
+	//cube.drawAsLine(worldMatrix*viewMatrix*persectiveMatrix, fbo);
+	cube.drawAsFace(worldMatrix*viewMatrix*persectiveMatrix, fbo);
 
 	fbo.display();
 

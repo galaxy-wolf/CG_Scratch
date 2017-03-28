@@ -24,6 +24,7 @@ public:
 	~Mesh();
 
 	void drawAsLine(const CG_MATH::Matrix4x4& MVP, FrameBuffer &fbo);
+	void drawAsFace(const CG_MATH::Matrix4x4& MVP, FrameBuffer &fbo);
 	std::vector<Group> m_groups;
 };
 
