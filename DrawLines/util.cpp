@@ -25,6 +25,56 @@ color4f operator*(float a, const color4f & c0)
 	return c0*a;
 }
 
+color3f operator+(const color3f &c0, const color3f &c1)
+{
+	return color3f(
+		c0.r+c1.r,
+		c0.g+c1.g,
+		c0.b+c1.b
+	);
+}
+
+color3f operator-(const color3f &c0, const color3f &c1)
+{
+	return color3f(
+		c0.r - c1.r,
+		c0.g - c1.g,
+		c0.b - c1.b
+	);
+}
+
+color3f operator*(const color3f &c0, const color3f &c1)
+{
+	return color3f(
+		c0.r * c1.r,
+		c0.g * c1.g,
+		c0.b * c1.b
+	);
+}
+
+color3f operator/(const color3f &c, const float a)
+{
+	return color3f(
+		c.r / a,
+		c.g / a,
+		c.b / a
+	);
+}
+
+color3f operator*(const color3f &c, const float a)
+{
+	return color3f(
+		c.r * a,
+		c.g * a,
+		c.b * a
+	);
+}
+
+color3f operator*(const float a, const color3f &c)
+{
+	return c*a;
+}
+
 vector3 doMVPTransform(const Matrix4x4 &mat, const vector3& v)
 {
 	vector3 res(0.0f, 0.0f, 0.0f);

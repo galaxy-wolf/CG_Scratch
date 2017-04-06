@@ -9,6 +9,7 @@
 
 #include "util.h"
 #include "Mesh.h"
+#include "DistantLight.h"
 #include "Matrix4x4.h"
 #include "Quaternion.h"
 #include "MathUtil.h"
@@ -35,6 +36,8 @@ FrameBuffer fbo(windowWidth, windowHeight);
 
 // Meshes;
 Mesh cube;
+
+DistantLight light;
 
 void myDisplay();
 void initMesh();
@@ -120,6 +123,11 @@ int main(int argc, char *argv[])
 {
 	initMesh();
 
+	light.dir = vector3(1.0f, 0.0f, 0.0f);
+	light.ia = color3f(0.1f, 0.1f, 0.1f);
+	light.id = color3f(0.4f, 0.4f, 0.4f);
+	light.is = color3f(0.4f, 0.4f, 0.4f);
+
 	// init window.
 
 	glutInit(&argc, argv);
@@ -141,7 +149,7 @@ int main(int argc, char *argv[])
 void initMesh()
 {
 	Group g;
-	g.m_ambient = red;
+	
 	g.m_vertices = 
 	{
 		vector3(-1.0f, 1.0f, -1.0f),
@@ -205,7 +213,7 @@ void myDisplay(void) {
 	persectiveMatrix.setupPerspective(50, windowWidth / windowHeight, .1f, 100.0f);
 	 
 	//cube.drawAsLine(worldMatrix*viewMatrix*persectiveMatrix, fbo);
-	cube.drawAsFace(worldMatrix*viewMatrix*persectiveMatrix, fbo);
+	cube.drawAsFace(worldMatrix*viewMatrix*persectiveMatrix, worldMatrix, camera.pos, light, fbo);
 
 	fbo.display();
 

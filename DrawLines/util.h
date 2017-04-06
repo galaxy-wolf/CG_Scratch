@@ -22,6 +22,29 @@ color4f operator/(const color4f& c0, float a);
 color4f operator*(const color4f& c0, float a);
 color4f operator*(float a, const color4f& c0);
 
+struct color3f {
+	float r, g, b;
+
+	color3f() = default;
+	color3f(const float R, const float G, const float B):r(R), g(G), b(B){}
+	color3f(const color4f& c):r(c.r), g(c.g), b(c.b){}
+
+	color3f & operator= (const color4f c)
+	{
+		r = c.r;
+		g = c.g;
+		b = c.b;
+		return *this;
+	}
+};
+
+color3f operator+ (const color3f&, const color3f&);
+color3f operator- (const color3f&, const color3f&);
+color3f operator* (const color3f&, const color3f&);
+color3f operator/ (const color3f&, const float);
+color3f operator* (const color3f&, const float);
+color3f operator* (const float, const color3f&);
+
 extern const color4f red;
 extern const color4f green;
 

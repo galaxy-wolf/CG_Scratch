@@ -166,6 +166,10 @@ void minAndMax(float &min, float &max, const float a, const float b, const float
 void FrameBuffer::drawTriangle(const CG_MATH::vector3 & v0, const color4f & color0, const CG_MATH::vector3 & v1, const color4f & color1, const CG_MATH::vector3 & v2, const color4f & color2)
 {
 	float area = edgeFunctionCW(v0, v1, v2);
+	vector2 edge0 = v2 - v1;
+	vector2 edge1 = v0 - v2;
+	vector2 edge2 = v1 - v0;
+
 	
 	// 0:CW
 	// 1:CCW
@@ -178,6 +182,9 @@ void FrameBuffer::drawTriangle(const CG_MATH::vector3 & v0, const color4f & colo
 	{
 		windingOrder = 1;
 		area *= -1.0f;
+		edge0 *= -1.0f;
+		edge1 *= -1.0f;
+		edge2 *= -1.0f;
 	}
 
 	// 求三角形覆盖的2D包围盒。
@@ -204,13 +211,21 @@ void FrameBuffer::drawTriangle(const CG_MATH::vector3 & v0, const color4f & colo
 			w1 = edgeFunctionCW(v2, v0, p);
 			w2 = edgeFunctionCW(v0, v1, p);
 
-			if (1 == windingOrder) {// CW
+			if (1 == windingOrder) {// CCW
 				w0 *= -1.0f;
 				w1 *= -1.0f;
 				w2 *= -1.0f;
 			}
 
-			if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
+			bool overlaps = true;
+
+			// If the point is on the edge, test if it is a top or left edge, 
+			// otherwise test if  the edge function is positive
+			overlaps &= (w0 == 0 ? ((edge0.y == 0 && edge0.x > 0) || edge0.y > 0) : (w0 > 0));
+			overlaps &= (w1 == 0 ? ((edge1.y == 0 && edge1.x > 0) || edge1.y > 0) : (w1 > 0));
+			overlaps &= (w2 == 0 ? ((edge2.y == 0 && edge2.x > 0) || edge2.y > 0) : (w2 > 0));
+
+			if (overlaps) {
 				w0 /= area;
 				w1 /= area;
 				w2 /= area;

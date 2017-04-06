@@ -5,9 +5,22 @@
 #include "util.h"
 #include "..\CG_MATH_D3D\Matrix4x4.h"
 #include "FrameBuffer.h"
+#include "DistantLight.h"
 
 struct Group
 {
+	struct vertex
+	{
+		CG_MATH::vector3 pos;
+		CG_MATH::vector3 normal;
+		vector2 texcoord;
+
+		// phone shading params
+		color3f ka;
+		color3f kd, ks;
+		float shiness;
+	};
+
 public:
 	std::vector<CG_MATH::vector3> m_vertices;
 	std::vector<color4f> m_vertexColors;
@@ -24,7 +37,7 @@ public:
 	~Mesh();
 
 	void drawAsLine(const CG_MATH::Matrix4x4& MVP, FrameBuffer &fbo);
-	void drawAsFace(const CG_MATH::Matrix4x4& MVP, FrameBuffer &fbo);
+	void drawAsFace(const CG_MATH::Matrix4x4& MVP, const CG_MATH::Matrix4x3& modelMatrix, const CG_MATH::vector3& cameraPos, const DistantLight & light, FrameBuffer &fbo);
 	std::vector<Group> m_groups;
 };
 

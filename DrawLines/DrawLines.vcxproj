@@ -148,6 +148,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DistantLight.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -159,6 +160,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DistantLight.h" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="util.h" />
