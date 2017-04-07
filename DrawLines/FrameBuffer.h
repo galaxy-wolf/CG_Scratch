@@ -2,13 +2,7 @@
 #include "vector3.h"
 #include "util.h"
 
-struct vector2
-{
-	float x, y;
-	vector2(float _x, float _y) :x(_x), y(_y) {}
-	vector2(const CG_MATH::vector3& v) :x(v.x), y(v.y) {}
-	void operator*= (float a) { x *= a; y *= a; }
-};
+
 
 class FrameBuffer
 {

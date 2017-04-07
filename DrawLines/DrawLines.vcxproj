@@ -91,6 +91,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalOptions> /D _CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,6 +122,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalOptions> /D _CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,7 +153,11 @@
     <ClCompile Include="DistantLight.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Render.cpp" />
+    <ClCompile Include="ResourceManager\glm.cpp" />
+    <ClCompile Include="ResourceManager\Mesh.cpp" />
+    <ClCompile Include="ResourceManager\MeshManager.cpp" />
+    <ClCompile Include="ResourceManager\TextureManger.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -162,7 +168,11 @@
   <ItemGroup>
     <ClInclude Include="DistantLight.h" />
     <ClInclude Include="FrameBuffer.h" />
-    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Render.h" />
+    <ClInclude Include="ResourceManager\glm.h" />
+    <ClInclude Include="ResourceManager\Mesh.h" />
+    <ClInclude Include="ResourceManager\MeshManager.h" />
+    <ClInclude Include="ResourceManager\TextureManger.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

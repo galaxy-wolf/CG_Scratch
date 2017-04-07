@@ -5,6 +5,8 @@ using namespace CG_MATH;
 const color4f red = color4f(1.0f, 0.0f, 0.0f, 1.0f);
 const color4f green = color4f(0.0f, 1.0f, 0.0f, 1.0f);
 
+color4f::color4f(const struct color3f& c) :r(c.r), g(c.g), b(c.b), a(1.0f) {}
+
 color4f operator+(const color4f & c0, const color4f & c1)
 {
 	return color4f(c0.r+c1.r, c0.g+c1.g, c0.b+c1.b, c0.a+c1.a);
@@ -85,4 +87,18 @@ vector3 doMVPTransform(const Matrix4x4 &mat, const vector3& v)
 	float w = v.x * mat.m14 + v.y * mat.m24 + v.z * mat.m34 + mat.m44;
 
 	return res / w;
+}
+
+vector3 vector4::div()
+{
+	return vector3(x/w, y/w, z/w);
+}
+
+void vector4::transform(CG_MATH::Matrix4x4 & MVP)
+{
+	float _x = x, _y = y, _z = z, _w = w;
+	x = _x * MVP.m11 + _y * MVP.m21 + _z * MVP.m31 + _w * MVP.m41;
+	y = _x * MVP.m12 + _y * MVP.m22 + _z * MVP.m32 + _w * MVP.m42;
+	z = _x * MVP.m13 + _y * MVP.m23 + _z * MVP.m33 + _w * MVP.m43;
+	w = _x * MVP.m14 + _y * MVP.m24 + _z * MVP.m34 + _w * MVP.m44;
 }

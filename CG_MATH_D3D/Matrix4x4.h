@@ -31,7 +31,7 @@ namespace CG_MATH
 
 		// 从3x4矩阵构造
 		
-		Matrix4x4(Matrix4x3 &a) {
+		Matrix4x4(const Matrix4x3 &a) {
 
 			// 直接赋值
 

@@ -8,7 +8,6 @@
 #include <GL\glut.h>
 
 #include "util.h"
-#include "Mesh.h"
 #include "DistantLight.h"
 #include "Matrix4x4.h"
 #include "Quaternion.h"
@@ -16,6 +15,9 @@
 #include "FPScamera.h"
 
 #include "FrameBuffer.h"
+
+#include "ResourceManager\MeshManager.h"
+#include "Render.h"
 
 using namespace std;
 using namespace CG_MATH;
@@ -29,13 +31,9 @@ const int windowHeight = 600;
 
 Matrix4x3 worldMatrix;
 Matrix4x3 viewMatrix;
-Matrix4x4 persectiveMatrix;
+Matrix4x4 perspectiveMatrix;
 
 FrameBuffer fbo(windowWidth, windowHeight);
-
-
-// Meshes;
-Mesh cube;
 
 DistantLight light;
 
@@ -124,7 +122,8 @@ int main(int argc, char *argv[])
 	initMesh();
 
 	light.dir = vector3(1.0f, 0.0f, 0.0f);
-	light.ia = color3f(0.1f, 0.1f, 0.1f);
+	light.dir.normalize();
+	light.ia = color3f(0.2f, 0.2f, 0.2f);
 	light.id = color3f(0.4f, 0.4f, 0.4f);
 	light.is = color3f(0.4f, 0.4f, 0.4f);
 
@@ -148,54 +147,9 @@ int main(int argc, char *argv[])
 
 void initMesh()
 {
-	Group g;
-	
-	g.m_vertices = 
-	{
-		vector3(-1.0f, 1.0f, -1.0f),
-		vector3(1.0f, 1.0f, -1.0f),
-		vector3(1.0f, 1.0f, 1.0f),
-		vector3(-1.0f, 1.0f, 1.0f),
-		vector3(-1.0f, -1.0f, -1.0f),
-		vector3(1.0f, -1.0f, -1.0f),
-		vector3(1.0f, -1.0f, 1.0f),
-		vector3(-1.0f, -1.0f, 1.0f),
-	};
+	MeshManager & MM = MeshManager::getInstance();
+	MM.addMesh("Resource//ball.obj");
 
-	g.m_vertexColors =
-	{
-		color4f(0.0f, 0.0f, 1.0f, 1.0f),
-		color4f(0.0f, 1.0f, 0.0f, 1.0f),
-		color4f(0.0f, 1.0f, 1.0f, 1.0f),
-		color4f(1.0f, 0.0f, 0.0f, 1.0f),
-		color4f(1.0f, 0.0f, 1.0f, 1.0f),
-		color4f(1.0f, 1.0f, 0.0f, 1.0f),
-		color4f(1.0f, 1.0f, 1.0f, 1.0f),
-		color4f(0.0f, 0.0f, 0.0f, 1.0f),
-	};
-
-	g.m_indices = 
-	{ 
-		3,1,0,
-		2,1,3,
-
-		0,5,4,
-		1,5,0,
-
-		3,4,7,
-		0,4,3,
-
-		1,6,5,
-		2,6,1,
-
-		2,7,6,
-		3,7,2,
-
-		6,4,5,
-		7,4,6, 
-	};
-
-	cube.m_groups.push_back(g);
 }
 
 void myDisplay(void) {
@@ -210,10 +164,18 @@ void myDisplay(void) {
 	// …Ë÷√MVPæÿ’Û
 	worldMatrix.setupTanslation(vector3(0.0f, 0.0f, 3.0f));
 	viewMatrix = camera.getMatrix();
-	persectiveMatrix.setupPerspective(50, windowWidth / windowHeight, .1f, 100.0f);
-	 
-	//cube.drawAsLine(worldMatrix*viewMatrix*persectiveMatrix, fbo);
-	cube.drawAsFace(worldMatrix*viewMatrix*persectiveMatrix, worldMatrix, camera.pos, light, fbo);
+	perspectiveMatrix.setupPerspective(50, windowWidth / windowHeight, .1f, 100.0f);
+	
+	const Render & render = Render::getInstance();
+	MeshManager & MM = MeshManager::getInstance();
+
+	RenderOption ro(perspectiveMatrix, viewMatrix, camera.pos, light);
+
+	for (int i = 0; i < MM.m_meshes.size(); ++i)
+	{
+		//render.drawAsLine(MM.m_meshes[0], ro, fbo);
+		render.drawAsFace(MM.m_meshes[0], ro, fbo);
+	}
 
 	fbo.display();
 
