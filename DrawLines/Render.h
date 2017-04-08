@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "vector3.h"
+#include "..\CG_MATH_D3D\vector3.h"
 #include "util.h"
 #include "..\CG_MATH_D3D\Matrix4x4.h"
 #include "FrameBuffer.h"

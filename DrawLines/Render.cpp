@@ -34,93 +34,70 @@ color3f PhongReflectionModel(
 	return ka * light.ia + kd * diffuse + ks * specular;
 }
 
-void clipAndDrawLine(vertex a, vertex b, FrameBuffer &fbo)
+void clipAndDrawLine(vertex A, vertex C, FrameBuffer &fbo)
 {
-	bool f1, f2;
 
-	// x = -1;
-	f1 = a.pos.w + a.pos.x > 0;
-	f2 = b.pos.w + b.pos.x > 0;
+	float tIn = 0.0f, tOut = 1.0f, tHit;
+	float aBC[6], cBC[6];
+	int aOutcode = 0, cOutcode = 0;
 
-	if (!f1 && !f2) // 改直线被剔除
+	aBC[0] = A.pos.w + A.pos.x;
+	aBC[1] = A.pos.w - A.pos.x;
+	aBC[2] = A.pos.w + A.pos.y;
+	aBC[3] = A.pos.w - A.pos.y;
+	aBC[4] = A.pos.w + A.pos.z;
+	aBC[5] = A.pos.w - A.pos.z;
+
+	cBC[0] = C.pos.w + C.pos.x;
+	cBC[1] = C.pos.w - C.pos.x;
+	cBC[2] = C.pos.w + C.pos.y;
+	cBC[3] = C.pos.w - C.pos.y;
+	cBC[4] = C.pos.w + C.pos.z;
+	cBC[5] = C.pos.w - C.pos.z;
+
+	for (int i = 0; i < 6; ++i)
+	{
+		aOutcode |= (aBC[i] > 0 ? 0 : 1) << i;
+		cOutcode |= (cBC[i] > 0 ? 0 : 1) << i;
+	}
+	
+	if ((aOutcode & cOutcode) != 0) // trivial reject
 		return;
 
-	if (!f1 && f2) // 使用交点Q替换a
+	if ((aOutcode | cOutcode) == 0) // trivial accept
 	{
-		float t = (a.x+a.w)
-	}
-	else if (f1 && !f2) // 使用交点Q替换b
-	{
-
-	}
-
-
-
-	// x = 1;
-	if (!f1 && !f2) // 改直线被剔除
+		fbo.drawLineInNDC(A.pos.div(), A.color, C.pos.div(), C.color);
 		return;
-
-	if (!f1 && f2) // 使用交点Q替换a
-	{
-
-	}
-	else if (f1 && !f2) // 使用交点Q替换b
-	{
-
 	}
 
-
-	// y = -1;
-	if (!f1 && !f2) // 改直线被剔除
-		return;
-
-	if (!f1 && f2) // 使用交点Q替换a
+	for (int i = 0; i < 6; ++i) // clip against each plane
 	{
-
+		if (cBC[i] < 0) // exit: C is outside
+		{
+			tHit = aBC[i] / (aBC[i] - cBC[i]);
+			tOut = fminf(tOut, tHit);
+		}
+		else if (aBC[i] < 0) // enters: A is outside
+		{
+			tHit = aBC[i] / (aBC[i] - cBC[i]);
+			tIn = fmaxf(tIn, tHit);
+		}
+		if (tIn > tOut) return; // CI is empty; early out
 	}
-	else if (f1 && !f2) // 使用交点Q替换b
+	
+	vertex tempA = A, tempC = C;
+
+	if (aOutcode != 0) // A is out: tIn has changed;
 	{
-
+		A = tempA + tIn * (tempC - tempA);
 	}
 
-
-	// y = 1;
-	if (!f1 && !f2) // 改直线被剔除
-		return;
-
-	if (!f1 && f2) // 使用交点Q替换a
+	if (cOutcode != 0) // C is out: tOut has changed;
 	{
-
+		C = tempA + tOut * (tempC - tempA);
 	}
-	else if (f1 && !f2) // 使用交点Q替换b
-	{
 
-	}
-	// z = -1;
-	if (!f1 && !f2) // 改直线被剔除
-		return;
-
-	if (!f1 && f2) // 使用交点Q替换a
-	{
-
-	}
-	else if (f1 && !f2) // 使用交点Q替换b
-	{
-
-	}
-	// z = 1;
-	if (!f1 && !f2) // 改直线被剔除
-		return;
-
-	if (!f1 && f2) // 使用交点Q替换a
-	{
-
-	}
-	else if (f1 && !f2) // 使用交点Q替换b
-	{
-
-	}
-	fbo.drawLineInNDC(a.pos.div(), a.color, b.pos.div(), b.color);
+	fbo.drawLineInNDC(A.pos.div(), A.color, C.pos.div(), C.color);
 }
 
 void Render::drawAsLine(const Mesh& mesh, const RenderOption& op, FrameBuffer &fbo) const
@@ -172,11 +149,6 @@ void Render::drawAsLine(const Mesh& mesh, const RenderOption& op, FrameBuffer &f
 			clipAndDrawLine(v0, v1, fbo);
 			clipAndDrawLine(v1, v2, fbo);
 			clipAndDrawLine(v2, v0, fbo);
-
-			//fbo.drawLineInNDC(v0.pos, color0, v1.pos, color1);
-			//fbo.drawLineInNDC(v1.pos, color1, v2.pos, color2);
-			//fbo.drawLineInNDC(v2.pos, color2, v0.pos, color0);
-			
 		}
 	}
 }
@@ -184,54 +156,54 @@ void Render::drawAsLine(const Mesh& mesh, const RenderOption& op, FrameBuffer &f
 void Render::drawAsFace(const Mesh& mesh, const RenderOption& op, FrameBuffer &fbo) const 
 {
 
-	MeshManager & MM = MeshManager::getInstance();
+	//MeshManager & MM = MeshManager::getInstance();
 
-	for (int gid = 0; gid < mesh.m_groupIndices.size(); ++gid)
-	{
-		const std::vector<unsigned int>& indices = mesh.m_groupIndices[gid];
-		const std::vector<float>& vertices = mesh.m_vertices;
-		const GLMmaterial& material = mesh.m_materials[mesh.m_groupMaterialID[gid]];
+	//for (int gid = 0; gid < mesh.m_groupIndices.size(); ++gid)
+	//{
+	//	const std::vector<unsigned int>& indices = mesh.m_groupIndices[gid];
+	//	const std::vector<float>& vertices = mesh.m_vertices;
+	//	const GLMmaterial& material = mesh.m_materials[mesh.m_groupMaterialID[gid]];
 
-		for (int vid = 0; vid < indices.size(); vid += 3)
-		{
-			vertex v0(&vertices[indices[vid] * MM.m_vtxSize]);
-			vertex v1(&vertices[indices[vid + 1] * MM.m_vtxSize]);
-			vertex v2(&vertices[indices[vid + 2] * MM.m_vtxSize]);
+	//	for (int vid = 0; vid < indices.size(); vid += 3)
+	//	{
+	//		vertex v0(&vertices[indices[vid] * MM.m_vtxSize]);
+	//		vertex v1(&vertices[indices[vid + 1] * MM.m_vtxSize]);
+	//		vertex v2(&vertices[indices[vid + 2] * MM.m_vtxSize]);
 
-			color4f color0 =
-				PhongReflectionModel(
-					op.light,
-					material.ambient, material.diffuse, material.specular, material.shininess,
-					v0.pos*mesh.m_ObjectToWorldMatrix,
-					v0.normal*mesh.m_ObjectToWorldMatrix,
-					op.cameraPos);
+	//		color4f color0 =
+	//			PhongReflectionModel(
+	//				op.light,
+	//				material.ambient, material.diffuse, material.specular, material.shininess,
+	//				v0.pos*mesh.m_ObjectToWorldMatrix,
+	//				v0.normal*mesh.m_ObjectToWorldMatrix,
+	//				op.cameraPos);
 
-			color4f color1 =
-				PhongReflectionModel(
-					op.light,
-					material.ambient, material.diffuse, material.specular, material.shininess,
-					v1.pos*mesh.m_ObjectToWorldMatrix,
-					v1.normal*mesh.m_ObjectToWorldMatrix,
-					op.cameraPos);
+	//		color4f color1 =
+	//			PhongReflectionModel(
+	//				op.light,
+	//				material.ambient, material.diffuse, material.specular, material.shininess,
+	//				v1.pos*mesh.m_ObjectToWorldMatrix,
+	//				v1.normal*mesh.m_ObjectToWorldMatrix,
+	//				op.cameraPos);
 
-			color4f color2 =
-				PhongReflectionModel(
-					op.light,
-					material.ambient, material.diffuse, material.specular, material.shininess,
-					v2.pos*mesh.m_ObjectToWorldMatrix,
-					v2.normal*mesh.m_ObjectToWorldMatrix,
-					op.cameraPos);
+	//		color4f color2 =
+	//			PhongReflectionModel(
+	//				op.light,
+	//				material.ambient, material.diffuse, material.specular, material.shininess,
+	//				v2.pos*mesh.m_ObjectToWorldMatrix,
+	//				v2.normal*mesh.m_ObjectToWorldMatrix,
+	//				op.cameraPos);
 
-			// 裁剪？ 在齐次坐标中进行裁剪
+	//		// 裁剪？ 在齐次坐标中进行裁剪
 
-			Matrix4x4 VP = op.viewMatrix*op.projectMatrix;
+	//		Matrix4x4 VP = op.viewMatrix*op.projectMatrix;
 
-			v0.pos = doMVPTransform(VP, v0.pos);
-			v1.pos = doMVPTransform(VP, v1.pos);
-			v2.pos = doMVPTransform(VP, v2.pos);
+	//		v0.pos = doMVPTransform(VP, v0.pos);
+	//		v1.pos = doMVPTransform(VP, v1.pos);
+	//		v2.pos = doMVPTransform(VP, v2.pos);
 
-			fbo.drawTriangleInNDC(v0.pos, color0, v1.pos, color1, v2.pos, color2);
-		}
-	}
+	//		fbo.drawTriangleInNDC(v0.pos, color0, v1.pos, color1, v2.pos, color2);
+	//	}
+	//}
 
 }

@@ -1,4 +1,4 @@
-#include "vector3.h"
+#include "..\CG_MATH_D3D\vector3.h"
 #include <iostream>
 #include <string>
 #include <time.h>
@@ -9,10 +9,10 @@
 
 #include "util.h"
 #include "DistantLight.h"
-#include "Matrix4x4.h"
-#include "Quaternion.h"
-#include "MathUtil.h"
-#include "FPScamera.h"
+#include "..\CG_MATH_D3D\Matrix4x4.h"
+#include "..\CG_MATH_D3D\Quaternion.h"
+#include "..\CG_MATH_D3D\MathUtil.h"
+#include "..\CG_MATH_D3D\FPScamera.h"
 
 #include "FrameBuffer.h"
 
@@ -173,8 +173,8 @@ void myDisplay(void) {
 
 	for (int i = 0; i < MM.m_meshes.size(); ++i)
 	{
-		//render.drawAsLine(MM.m_meshes[0], ro, fbo);
-		render.drawAsFace(MM.m_meshes[0], ro, fbo);
+		render.drawAsLine(MM.m_meshes[0], ro, fbo);
+		//render.drawAsFace(MM.m_meshes[0], ro, fbo);
 	}
 
 	fbo.display();

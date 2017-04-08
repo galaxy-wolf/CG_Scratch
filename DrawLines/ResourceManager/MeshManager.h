@@ -1,8 +1,8 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "vector3.h"
-#include "Matrix4x3.h"
+#include "../../CG_MATH_D3D/vector3.h"
+#include "../../CG_MATH_D3D/Matrix4x3.h"
 #include "Mesh.h"
 
 class Mesh;

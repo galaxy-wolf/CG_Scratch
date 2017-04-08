@@ -15,7 +15,13 @@ struct vertex
 	color4f color;
 
 	vertex(const float * const a):pos(a[0], a[1], a[2], 1.0f), normal(a[3], a[4], a[5]), texcoord(a[6], a[7]), color(0.0f, 0.0f, 0.0f, 1.0f){}
+	vertex() :normal(CG_MATH::kZeroVector), texcoord(0.0f, 0.0f) {}
+
+	vertex operator-(const vertex& a) const;
+	vertex operator+(const vertex& a) const;
+	vertex operator*(const float a) const;
 };
+vertex operator* (const float a, const vertex& v);
 
 
 // 一个mesh的所有信息

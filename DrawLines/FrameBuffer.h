@@ -1,5 +1,5 @@
 #pragma once
-#include "vector3.h"
+#include "..\CG_MATH_D3D\vector3.h"
 #include "util.h"
 
 

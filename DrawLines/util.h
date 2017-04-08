@@ -9,16 +9,62 @@ struct vector2
 	vector2(float _x, float _y) :x(_x), y(_y) {}
 	vector2(const CG_MATH::vector3& v) :x(v.x), y(v.y) {}
 	void operator*= (float a) { x *= a; y *= a; }
+
+	vector2 operator-(const vector2& a) const
+	{
+		return vector2(x - a.x, y - a.y);
+	}
+
+	vector2 operator+(const vector2& a) const 
+	{
+		return vector2(x + a.x, y + a.y);
+	}
+
+	vector2 operator*(const float a) const
+	{
+		return vector2(x*a, y*a);
+	}
+
+	vector2 operator/(const float a) const
+	{
+		return vector2(x/a, y/a);
+	}
 };
+
+vector2 operator*(const float a, const vector2 & v);
 
 struct vector4
 {
 	float x, y, z, w;
 	vector4(float _x, float _y, float _z, float _w):x(_x), y(_y), z(_z), w(_w){}
-	vector4(const vector3& a):x(a.x), y(a.y), z(a.z), w(1.0f){}
-	vector3 div();
+	vector4(const CG_MATH::vector3& a):x(a.x), y(a.y), z(a.z), w(1.0f){}
+	vector4() = default;
+	CG_MATH::vector3 div();
 	void transform(CG_MATH::Matrix4x4& MVP);
+
+	vector4 operator- (const vector4& a)const
+	{
+		return vector4(x - a.x, y - a.y, z - a.z, w - a.w);
+	}
+
+	vector4 operator+ (const vector4& a)const
+	{
+		return vector4(x + a.x, y + a.y, z + a.z, w + a.w);
+	}
+
+	vector4 operator* (const float a)const
+	{
+		return vector4(x*a, y*a, z*a, w*a);
+	}
+
+	vector4 operator/ (const float a)const
+	{
+		return vector4(x/a, y/a, z/a, w/a);
+	}
+
 };
+
+vector4 operator* (const float a, const vector4& v);
 
 struct color3f;
 

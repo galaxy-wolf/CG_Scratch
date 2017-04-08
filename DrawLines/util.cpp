@@ -7,6 +7,16 @@ const color4f green = color4f(0.0f, 1.0f, 0.0f, 1.0f);
 
 color4f::color4f(const struct color3f& c) :r(c.r), g(c.g), b(c.b), a(1.0f) {}
 
+vector2 operator*(const float a, const vector2 & v)
+{
+	return vector2(a*v.x, a*v.y);
+}
+
+vector4 operator*(const float a, const vector4 & v)
+{
+	return vector4(a*v.x, a*v.y, a*v.z, a*v.w);
+}
+
 color4f operator+(const color4f & c0, const color4f & c1)
 {
 	return color4f(c0.r+c1.r, c0.g+c1.g, c0.b+c1.b, c0.a+c1.a);
@@ -19,7 +29,7 @@ color4f operator/(const color4f & c0, float a)
 
 color4f operator*(const color4f & c0, float a)
 {
-	return color4f(c0.r * a, c0.g * a, c0.b * a, c0.a * a);
+	return color4f(c0.r*a, c0.g*a, c0.b*a, c0.a*a);
 }
 
 color4f operator*(float a, const color4f & c0)

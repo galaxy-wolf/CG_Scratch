@@ -149,3 +149,37 @@ void Mesh::compileMesh(const GLMmodel * model)
 
 }
 
+vertex vertex::operator-(const vertex & a) const
+{
+	vertex ret;
+	ret.pos = pos - a.pos;
+	ret.normal = normal - a.normal;
+	ret.texcoord = texcoord - a.texcoord;
+	ret.color = color - a.color;
+	return ret;
+}
+
+vertex vertex::operator+(const vertex & a) const
+{
+	vertex ret;
+	ret.pos = pos + a.pos;
+	ret.normal = normal + a.normal;
+	ret.texcoord = texcoord + a.texcoord;
+	ret.color = color + a.color;
+	return ret;
+}
+
+vertex vertex::operator*(const float a) const
+{
+	vertex ret;
+	ret.pos = pos*a;
+	ret.normal = normal*a;
+	ret.texcoord = texcoord*a;
+	ret.color = color*a;
+	return ret;
+}
+
+vertex operator*(const float a, const vertex & v)
+{
+	return v*a;
+}
