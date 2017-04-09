@@ -2,11 +2,13 @@
 #include <map>
 #include <string>
 #include "../util.h"
+#include <opencv2/opencv.hpp>
+
 
 struct Image2D {
 	unsigned int width;
 	unsigned int height;
-	color4f *data;
+	color3f *data;
 };
 
 
@@ -43,12 +45,12 @@ public:
 	void reset();
 
 	// 获得TexID
-	Image2D& getImage(const char* texPath);
+	IplImage* getImage(const char* texPath);
 
 	
 private:
 	// 私有成员函数
-	std::map<std::string, Image2D> m_nameToImage2D;
+	std::map<std::string, IplImage*> m_nameToImage2D;
 	std::string m_baseDir;
 
 };

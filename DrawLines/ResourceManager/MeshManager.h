@@ -28,6 +28,7 @@ public:
 	MeshManager & operator=(const MeshManager &m) = delete;
 
 	void addMesh(const std::string& path);
+	void reset() { m_meshes.clear(); m_triangleNum = 0; }
 
 	// 公共数据
 	// position, normal, texture coordinate
@@ -44,6 +45,8 @@ public:
 	std::vector<Mesh> m_meshes;
 
 	unsigned int m_triangleNum;
+
+	
 
 private:
 	

@@ -53,6 +53,7 @@ artifacts/
 *.obj
 !ball.obj
 !box.obj
+!dunpai.obj
 *.pch
 *.pdb
 *.pgc

@@ -17,6 +17,7 @@
 #include "FrameBuffer.h"
 
 #include "ResourceManager\MeshManager.h"
+#include "ResourceManager\TextureManger.h"
 #include "Render.h"
 
 using namespace std;
@@ -24,7 +25,18 @@ using namespace CG_MATH;
 
 //全局变量
 static bool flag = 1;
+enum DrawMode{DRAW_LINE=0, DRAW_TRIANGLE, DRAW_MODE_SIZE};
+static DrawMode drawMode = DRAW_TRIANGLE; // 0: 画线， 1：画面
 FPScamera camera;
+
+
+vector<string> models = {
+	"Resource//box.obj",
+	"Resource//ball.obj",
+	"Resource//dunpai.obj",
+};
+
+static int curModelID = 2;
 
 const int windowWidth = 600;
 const int windowHeight = 600;
@@ -108,8 +120,15 @@ void keyboard(unsigned char key, int x, int y) {
 	case 'e':
 		camera.move(0, 0, -step);
 		break;
+	case 'f':
+		drawMode = (DrawMode)((drawMode + 1) % DRAW_MODE_SIZE);
+		break;
 
-
+	case 'm':
+		curModelID = (curModelID + 1) % models.size();
+		MeshManager::getInstance().reset();
+		MeshManager::getInstance().addMesh(models[curModelID]);
+		break;
 	default:
 		break;
 	}
@@ -117,11 +136,22 @@ void keyboard(unsigned char key, int x, int y) {
 	myDisplay();
 }
 
+void printHelp()
+{
+	std::cout << "使用方法：" << std::endl;
+	std::cout << "按下鼠标左键，控制视角移动。" << std::endl;
+	std::cout << "[w, s, a, d]: 控制视点前后左右移动。" << std::endl;
+	std::cout << "[q, e] :控制视点上下移动。" << std::endl;
+	std::cout <<std::endl;
+	std::cout << "[f]: 改变绘制模式。" << std::endl;
+	std::cout << "[m]: 切换模型。" << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
 	initMesh();
 
-	light.dir = vector3(1.0f, 0.0f, 0.0f);
+	light.dir = vector3(0.0f, 0.0f, 1.0f);
 	light.dir.normalize();
 	light.ia = color3f(0.2f, 0.2f, 0.2f);
 	light.id = color3f(0.4f, 0.4f, 0.4f);
@@ -140,16 +170,21 @@ int main(int argc, char *argv[])
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
 	
+	printHelp();
+
 	glutMainLoop();
 	return 0;
 }
 
 
+
 void initMesh()
 {
 	MeshManager & MM = MeshManager::getInstance();
-	MM.addMesh("Resource//ball.obj");
+	MM.addMesh(models[curModelID]);
 
+	TextureManager::getInstance().setBaseDirPath("Resource//");
+	
 }
 
 void myDisplay(void) {
@@ -173,8 +208,17 @@ void myDisplay(void) {
 
 	for (int i = 0; i < MM.m_meshes.size(); ++i)
 	{
-		render.drawAsLine(MM.m_meshes[0], ro, fbo);
-		//render.drawAsFace(MM.m_meshes[0], ro, fbo);
+		switch (drawMode)
+		{
+		case DRAW_LINE: // 画线
+			render.drawAsLine(MM.m_meshes[0], ro, fbo);
+			break;
+		case DRAW_TRIANGLE:  // 画面
+			render.drawAsFace(MM.m_meshes[0], ro, fbo);
+			break;
+		default:
+			break;
+		}			
 	}
 
 	fbo.display();

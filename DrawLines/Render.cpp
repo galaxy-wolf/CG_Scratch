@@ -156,54 +156,58 @@ void Render::drawAsLine(const Mesh& mesh, const RenderOption& op, FrameBuffer &f
 void Render::drawAsFace(const Mesh& mesh, const RenderOption& op, FrameBuffer &fbo) const 
 {
 
-	//MeshManager & MM = MeshManager::getInstance();
+	MeshManager & MM = MeshManager::getInstance();
 
-	//for (int gid = 0; gid < mesh.m_groupIndices.size(); ++gid)
-	//{
-	//	const std::vector<unsigned int>& indices = mesh.m_groupIndices[gid];
-	//	const std::vector<float>& vertices = mesh.m_vertices;
-	//	const GLMmaterial& material = mesh.m_materials[mesh.m_groupMaterialID[gid]];
+	for (int gid = 0; gid < mesh.m_groupIndices.size(); ++gid)
+	{
+		const std::vector<unsigned int>& indices = mesh.m_groupIndices[gid];
+		const std::vector<float>& vertices = mesh.m_vertices;
+		const GLMmaterial& material = mesh.m_materials[mesh.m_groupMaterialID[gid]];
 
-	//	for (int vid = 0; vid < indices.size(); vid += 3)
-	//	{
-	//		vertex v0(&vertices[indices[vid] * MM.m_vtxSize]);
-	//		vertex v1(&vertices[indices[vid + 1] * MM.m_vtxSize]);
-	//		vertex v2(&vertices[indices[vid + 2] * MM.m_vtxSize]);
+		for (int vid = 0; vid < indices.size(); vid += 3)
+		{
+			vertex v0(&vertices[indices[vid] * MM.m_vtxSize]);
+			vertex v1(&vertices[indices[vid + 1] * MM.m_vtxSize]);
+			vertex v2(&vertices[indices[vid + 2] * MM.m_vtxSize]);
 
-	//		color4f color0 =
-	//			PhongReflectionModel(
-	//				op.light,
-	//				material.ambient, material.diffuse, material.specular, material.shininess,
-	//				v0.pos*mesh.m_ObjectToWorldMatrix,
-	//				v0.normal*mesh.m_ObjectToWorldMatrix,
-	//				op.cameraPos);
+			color4f color0 =
+				PhongReflectionModel(
+					op.light,
+					material.ambient, material.diffuse, material.specular, material.shininess,
+					v0.pos.div()*mesh.m_ObjectToWorldMatrix,
+					v0.normal*mesh.m_ObjectToWorldMatrix,
+					op.cameraPos);
 
-	//		color4f color1 =
-	//			PhongReflectionModel(
-	//				op.light,
-	//				material.ambient, material.diffuse, material.specular, material.shininess,
-	//				v1.pos*mesh.m_ObjectToWorldMatrix,
-	//				v1.normal*mesh.m_ObjectToWorldMatrix,
-	//				op.cameraPos);
+			color4f color1 =
+				PhongReflectionModel(
+					op.light,
+					material.ambient, material.diffuse, material.specular, material.shininess,
+					v1.pos.div()*mesh.m_ObjectToWorldMatrix,
+					v1.normal*mesh.m_ObjectToWorldMatrix,
+					op.cameraPos);
 
-	//		color4f color2 =
-	//			PhongReflectionModel(
-	//				op.light,
-	//				material.ambient, material.diffuse, material.specular, material.shininess,
-	//				v2.pos*mesh.m_ObjectToWorldMatrix,
-	//				v2.normal*mesh.m_ObjectToWorldMatrix,
-	//				op.cameraPos);
+			color4f color2 =
+				PhongReflectionModel(
+					op.light,
+					material.ambient, material.diffuse, material.specular, material.shininess,
+					v2.pos.div()*mesh.m_ObjectToWorldMatrix,
+					v2.normal*mesh.m_ObjectToWorldMatrix,
+					op.cameraPos);
 
-	//		// 裁剪？ 在齐次坐标中进行裁剪
+			// 裁剪？ 在齐次坐标中进行裁剪
 
-	//		Matrix4x4 VP = op.viewMatrix*op.projectMatrix;
+			Matrix4x4 VP = op.viewMatrix*op.projectMatrix;
 
-	//		v0.pos = doMVPTransform(VP, v0.pos);
-	//		v1.pos = doMVPTransform(VP, v1.pos);
-	//		v2.pos = doMVPTransform(VP, v2.pos);
+			v0.pos = doMVPTransform(VP, v0.pos.div());
+			v1.pos = doMVPTransform(VP, v1.pos.div());
+			v2.pos = doMVPTransform(VP, v2.pos.div());
 
-	//		fbo.drawTriangleInNDC(v0.pos, color0, v1.pos, color1, v2.pos, color2);
-	//	}
-	//}
+			fbo.drawTriangleInNDC(
+				v0.pos.div(), color0, v0.texcoord, 
+				v1.pos.div(), color1, v1.texcoord,
+				v2.pos.div(), color2, v2.texcoord,
+				material.diffuse_map);
+		}
+	}
 
 }

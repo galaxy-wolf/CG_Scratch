@@ -26,13 +26,14 @@ public:
 	/// 绘制基本图元； 这里只是完成 Fragment 工作
 	void drawLine(const CG_MATH::vector3& p0, const color4f &color0, const CG_MATH::vector3 &p1, const color4f& color1);
 	void drawLineInNDC(const CG_MATH::vector3& p0, const color4f &color0, const CG_MATH::vector3 &p1, const color4f& color1);
-	void drawTriangle(const CG_MATH::vector3& v0, const color4f &color0,
-					  const CG_MATH::vector3& v1, const color4f &color1, 
-					  const CG_MATH::vector3& v2, const color4f &color2);
+	void drawTriangle(const CG_MATH::vector3& v0, const color4f &color0, const vector2& tc0,
+					  const CG_MATH::vector3& v1, const color4f &color1, const vector2& tc1,
+					  const CG_MATH::vector3& v2, const color4f &color2, const vector2& tc2,
+					  const char * texName);
 
-	void drawTriangleInNDC(const CG_MATH::vector3& v0, const color4f &color0,
-		const CG_MATH::vector3& v1, const color4f &color1,
-		const CG_MATH::vector3& v2, const color4f &color2);
+	void drawTriangleInNDC(const CG_MATH::vector3& v0, const color4f &color0, const vector2& tc0,
+		const CG_MATH::vector3& v1, const color4f &color1, const vector2& tc1,
+		const CG_MATH::vector3& v2, const color4f &color2, const vector2& tc2, const char * texName);
 
 
 private:

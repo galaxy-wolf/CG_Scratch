@@ -1,6 +1,6 @@
 #include "TextureManger.h"
 #include <cstdio>
-//#include <opencv2/opencv.hpp>
+
 
 using namespace std;
 
@@ -18,7 +18,7 @@ void TextureManager::reset()
 	m_baseDir = string();
 }
 
-Image2D& TextureManager::getImage(const char * texPath)
+IplImage* TextureManager::getImage(const char * texPath)
 {
 
 	if (m_nameToImage2D.count(texPath))
@@ -27,14 +27,16 @@ Image2D& TextureManager::getImage(const char * texPath)
 	// load image;
 
 	string fullPath = m_baseDir + "//" + texPath;
-	//IplImage *Iface = cvLoadImage(fullPath.c_str());
-	//if (!Iface)
-	//{
-	//	fprintf(stderr, "%s %d: opencv load file error: %s\n", __FILE__, __LINE__, fullPath.c_str());
-	//	exit(-1);
-	//}
+	IplImage *Iface = cvLoadImage(fullPath.c_str());
+	if (!Iface)
+	{
+		fprintf(stderr, "%s %d: opencv load file error: %s\n", __FILE__, __LINE__, fullPath.c_str());
+		exit(-1);
+	}
+
+
 
 	// ¥¥Ω®OpengGL Œ∆¿Ì
-	m_nameToImage2D[texPath] = Image2D(); //?
-	return m_nameToImage2D[texPath];
+	m_nameToImage2D[texPath] = Iface; //?
+	return Iface;
 }

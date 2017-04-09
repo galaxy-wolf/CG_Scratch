@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <GL/glut.h>
 #include "util.h"
+#include "ResourceManager\TextureManger.h"
 
 using namespace CG_MATH;
 
@@ -135,12 +136,15 @@ float FrameBuffer::edgeFunctionCCW(const vector2 & A, const vector2 & B, const v
 }
 
 /// 画三角形
-void FrameBuffer::drawTriangleInNDC(const CG_MATH::vector3 & v0, const color4f & color0, const CG_MATH::vector3 & v1, const color4f & color1, const CG_MATH::vector3 & v2, const color4f & color2)
+void FrameBuffer::drawTriangleInNDC(const CG_MATH::vector3& v0, const color4f &color0, const vector2& tc0,
+	const CG_MATH::vector3& v1, const color4f &color1, const vector2& tc1,
+	const CG_MATH::vector3& v2, const color4f &color2, const vector2& tc2, const char * texName)
 {
 	return drawTriangle(
-			NDCspaceToRasterSpace(v0), color0,
-			NDCspaceToRasterSpace(v1), color1,
-			NDCspaceToRasterSpace(v2), color2
+			NDCspaceToRasterSpace(v0), color0, tc0,
+			NDCspaceToRasterSpace(v1), color1, tc1,
+			NDCspaceToRasterSpace(v2), color2, tc2,
+			texName
 		);
 }
 
@@ -163,7 +167,10 @@ void minAndMax(float &min, float &max, const float a, const float b, const float
 		max = c;
 }
 
-void FrameBuffer::drawTriangle(const CG_MATH::vector3 & v0, const color4f & color0, const CG_MATH::vector3 & v1, const color4f & color1, const CG_MATH::vector3 & v2, const color4f & color2)
+void FrameBuffer::drawTriangle(const CG_MATH::vector3& v0, const color4f &color0, const vector2& tc0,
+	const CG_MATH::vector3& v1, const color4f &color1, const vector2& tc1,
+	const CG_MATH::vector3& v2, const color4f &color2, const vector2& tc2,
+	const char * texName) 
 {
 	float area = edgeFunctionCW(v0, v1, v2);
 	vector2 edge0 = v2 - v1;
@@ -196,6 +203,10 @@ void FrameBuffer::drawTriangle(const CG_MATH::vector3 & v0, const color4f & colo
 	color4f color0OverZ0 = color0 / v0.z;
 	color4f color1OverZ1 = color1 / v1.z;
 	color4f color2OverZ2 = color2 / v2.z;
+
+	vector2 tc0OverZ0 = tc0 / v0.z;
+	vector2 tc1OverZ1 = tc1 / v1.z;
+	vector2 tc2OverZ2 = tc2 / v2.z;
 
 	float oneOverZ0 = 1.0f / v0.z;
 	float oneOverZ1 = 1.0f / v1.z;
@@ -233,6 +244,22 @@ void FrameBuffer::drawTriangle(const CG_MATH::vector3 & v0, const color4f & colo
 				float z = 1.0f/(oneOverZ0*w0 + oneOverZ1* w1 + oneOverZ2*w2);
 				color4f color = (color0OverZ0*w0 + color1OverZ1*w1 + color2OverZ2*w2) *z;
 
+				if (texName[0] != '\0') // 如果有纹理，读取纹理，并和颜色值相乘，得到最终颜色。
+				{
+					vector2 tc = (tc0OverZ0*w0 + tc1OverZ1*w1 + tc2OverZ2*w2) *z;
+					color3f texColor;
+
+					IplImage* image = TextureManager::getInstance().getImage(texName);
+					int posX = (tc.x) * (image->width - 1);
+					int posY = (1.0f-tc.y) * (image->height - 1);
+
+					texColor.b = (unsigned char)(image->imageData[((posY*image->width) + posX) * 3 + 0]) / 255.0f;
+					texColor.g = (unsigned char)(image->imageData[((posY*image->width) + posX) * 3 + 1]) / 255.0f;
+					texColor.r = (unsigned char)(image->imageData[((posY*image->width) + posX) * 3 + 2]) / 255.0f;
+
+					color = texColor * color;
+				}
+				
 				drawPoint(vector3(p.x, p.y, z), color);
 			}
 
