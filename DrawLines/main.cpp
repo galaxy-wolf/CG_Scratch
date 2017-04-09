@@ -199,7 +199,7 @@ void myDisplay(void) {
 	// …Ë÷√MVPæÿ’Û
 	worldMatrix.setupTanslation(vector3(0.0f, 0.0f, 3.0f));
 	viewMatrix = camera.getMatrix();
-	perspectiveMatrix.setupPerspective(50, windowWidth / windowHeight, .1f, 100.0f);
+	perspectiveMatrix.setupPerspective(50, windowWidth / windowHeight, .01f, 100.0f);
 	
 	const Render & render = Render::getInstance();
 	MeshManager & MM = MeshManager::getInstance();

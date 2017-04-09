@@ -153,6 +153,80 @@ void Render::drawAsLine(const Mesh& mesh, const RenderOption& op, FrameBuffer &f
 	}
 }
 
+float get_zNegOne_plane_BC(const vertex& s)
+{
+	return s.pos.w + s.pos.z;
+}
+
+
+float get_zOne_plane_BC(const vertex& s)
+{
+	return s.pos.w - s.pos.z;
+}
+
+void Sutherland_Hodgman_Clipp(vector<vertex>& v, const vertex& s, const vertex& p, float (*getBC)(const vertex&s))
+{
+	float sBC = getBC(s);
+	float pBC = getBC(p);
+
+	if (sBC > 0 && pBC > 0) // case 1; both inside; output p
+	{
+		v.push_back(p);
+	}
+	else if (sBC > 0 && pBC <= 0) // case 2: s inside, p outside; find intersection i output i
+	{
+		float tIn = sBC / (sBC - pBC);
+		v.push_back(s + (p - s)*tIn);
+	}
+	else if (sBC <= 0 && pBC > 0) // case 3: s outside, p inside; find intersection i, output i then p;
+	{
+		float tIn = sBC / (sBC - pBC);
+		v.push_back(s + (p - s)*tIn);
+		v.push_back(p);
+	}
+	else  // case 4: s outside, p outside; output nothing;
+		return;
+
+}
+
+void Sutherland_Hodgman_Clipping_AndDrawTriangle(vector<vertex>& v, const char * texPath, FrameBuffer &fbo)
+{
+	vector<vertex> newV;
+
+	// clip z = -1;
+	Sutherland_Hodgman_Clipp(newV, v[v.size() - 1], v[0], get_zNegOne_plane_BC);
+	for (int i=1; i<v.size(); ++i)
+		Sutherland_Hodgman_Clipp(newV, v[i-1], v[i], get_zNegOne_plane_BC);
+
+
+	if (newV.size() < 3)
+		return;
+	
+	v = newV;
+	newV.clear();
+
+	// clip z = 1;
+
+	Sutherland_Hodgman_Clipp(newV, v[v.size() - 1], v[0], get_zOne_plane_BC);
+	for (int i = 1; i<v.size(); ++i)
+		Sutherland_Hodgman_Clipp(newV, v[i - 1], v[i], get_zOne_plane_BC);
+
+	if (newV.size() < 3)
+		return;
+	v = newV;
+
+	for (int i = 1; i + 1 < v.size(); ++i)
+	{
+		fbo.drawTriangleInNDC(
+			v[0].pos.div(), v[0].color, v[0].texcoord,
+			v[i].pos.div(), v[i].color, v[i].texcoord,
+			v[i+1].pos.div(), v[i+1].color, v[i+1].texcoord,
+			texPath);
+	}
+
+}
+
+
 void Render::drawAsFace(const Mesh& mesh, const RenderOption& op, FrameBuffer &fbo) const 
 {
 
@@ -170,7 +244,7 @@ void Render::drawAsFace(const Mesh& mesh, const RenderOption& op, FrameBuffer &f
 			vertex v1(&vertices[indices[vid + 1] * MM.m_vtxSize]);
 			vertex v2(&vertices[indices[vid + 2] * MM.m_vtxSize]);
 
-			color4f color0 =
+			v0.color =
 				PhongReflectionModel(
 					op.light,
 					material.ambient, material.diffuse, material.specular, material.shininess,
@@ -178,7 +252,7 @@ void Render::drawAsFace(const Mesh& mesh, const RenderOption& op, FrameBuffer &f
 					v0.normal*mesh.m_ObjectToWorldMatrix,
 					op.cameraPos);
 
-			color4f color1 =
+			v1.color =
 				PhongReflectionModel(
 					op.light,
 					material.ambient, material.diffuse, material.specular, material.shininess,
@@ -186,7 +260,7 @@ void Render::drawAsFace(const Mesh& mesh, const RenderOption& op, FrameBuffer &f
 					v1.normal*mesh.m_ObjectToWorldMatrix,
 					op.cameraPos);
 
-			color4f color2 =
+			v2.color =
 				PhongReflectionModel(
 					op.light,
 					material.ambient, material.diffuse, material.specular, material.shininess,
@@ -194,19 +268,19 @@ void Render::drawAsFace(const Mesh& mesh, const RenderOption& op, FrameBuffer &f
 					v2.normal*mesh.m_ObjectToWorldMatrix,
 					op.cameraPos);
 
-			// 裁剪？ 在齐次坐标中进行裁剪
-
 			Matrix4x4 VP = op.viewMatrix*op.projectMatrix;
 
-			v0.pos = doMVPTransform(VP, v0.pos.div());
-			v1.pos = doMVPTransform(VP, v1.pos.div());
-			v2.pos = doMVPTransform(VP, v2.pos.div());
+			v0.pos.transform(VP);
+			v1.pos.transform(VP);
+			v2.pos.transform(VP);
 
-			fbo.drawTriangleInNDC(
-				v0.pos.div(), color0, v0.texcoord, 
-				v1.pos.div(), color1, v1.texcoord,
-				v2.pos.div(), color2, v2.texcoord,
-				material.diffuse_map);
+			vector<vertex> v;
+			v.push_back(v0);
+			v.push_back(v1);
+			v.push_back(v2);
+
+			Sutherland_Hodgman_Clipping_AndDrawTriangle(v, material.diffuse_map, fbo);
+
 		}
 	}
 

@@ -172,6 +172,22 @@ void FrameBuffer::drawTriangle(const CG_MATH::vector3& v0, const color4f &color0
 	const CG_MATH::vector3& v2, const color4f &color2, const vector2& tc2,
 	const char * texName) 
 {
+
+	// 求三角形覆盖的2D包围盒。考虑了 x=1，x=-1, y=1, y=-1 四个裁剪面的裁剪。
+	float xMin = 0, xMax = m_width, yMin = 0, yMax = m_height;
+
+	minAndMax(xMin, xMax, v0.x, v1.x, v2.x);
+	minAndMax(yMin, yMax, v0.y, v1.y, v2.y);
+
+	xMin = fmaxf(0, xMin);
+	yMin = fmaxf(0, yMin);
+	xMax = fminf(xMax, m_width);
+	yMax = fminf(yMax, m_height);
+
+	if (xMin >= xMax || yMin >= yMax)
+		return;
+
+
 	float area = edgeFunctionCW(v0, v1, v2);
 	vector2 edge0 = v2 - v1;
 	vector2 edge1 = v0 - v2;
@@ -194,15 +210,16 @@ void FrameBuffer::drawTriangle(const CG_MATH::vector3& v0, const color4f &color0
 		edge2 *= -1.0f;
 	}
 
-	// 求三角形覆盖的2D包围盒。
-	float xMin, xMax, yMin, yMax;
-	
-	minAndMax(xMin, xMax, v0.x, v1.x, v2.x);
-	minAndMax(yMin, yMax, v0.y, v1.y, v2.y);
-
 	color4f color0OverZ0 = color0 / v0.z;
 	color4f color1OverZ1 = color1 / v1.z;
 	color4f color2OverZ2 = color2 / v2.z;
+
+	if (tc0.x > 1.0f || tc0.x < 0.0f || tc0.y > 1.0f || tc0.y < 0.0f)
+		std::cout << tc0.x << " " << tc0.y<<std::endl;
+	if (tc1.x > 1.0f || tc1.x < 0.0f || tc1.y > 1.0f || tc1.y < 0.0f)
+		std::cout << tc1.x << " " << tc1.y << std::endl;
+	if (tc2.x > 1.0f || tc2.x < 0.0f || tc2.y > 1.0f || tc2.y < 0.0f)
+		std::cout << tc2.x << " " << tc2.y << std::endl;
 
 	vector2 tc0OverZ0 = tc0 / v0.z;
 	vector2 tc1OverZ1 = tc1 / v1.z;
@@ -249,9 +266,23 @@ void FrameBuffer::drawTriangle(const CG_MATH::vector3& v0, const color4f &color0
 					vector2 tc = (tc0OverZ0*w0 + tc1OverZ1*w1 + tc2OverZ2*w2) *z;
 					color3f texColor;
 
+					tc.x = fminf(fmaxf(0.0f, tc.x), 1.0f);
+					tc.y = fminf(fmaxf(0.0f, tc.y), 1.0f);
+
 					IplImage* image = TextureManager::getInstance().getImage(texName);
 					int posX = (tc.x) * (image->width - 1);
 					int posY = (1.0f-tc.y) * (image->height - 1);
+
+					/*if (tc.x > 1.0f || tc.x < 0.0f || tc.y > 1.0f || tc.y < 0.0f)
+					{
+						std::cout << "tc " << tc.x << " " << tc.y << std::endl;
+						std::cout << w0 <<" " <<w1<<" "<<w2<<" " << w0 + w1 + w2<<std::endl;
+						std::cout << v0.z << " " << v1.z << " " << v2.z << " " << z << std::endl;
+						std::cout << "tc0 " << tc0.x << " " << tc0.y << std::endl;
+						std::cout << "tc1 " << tc1.x << " " << tc1.y << std::endl;
+						std::cout << "tc2 " << tc2.x << " " << tc2.y << std::endl;
+						std::cout << std::endl;
+					}*/
 
 					texColor.b = (unsigned char)(image->imageData[((posY*image->width) + posX) * 3 + 0]) / 255.0f;
 					texColor.g = (unsigned char)(image->imageData[((posY*image->width) + posX) * 3 + 1]) / 255.0f;
